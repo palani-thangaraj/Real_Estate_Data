@@ -246,5 +246,45 @@ namespace RealEstateMap
                 //loadSales();
             }
         }
+
+        private void Label11_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void Label12_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TextBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Label13_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TextBox3_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Label14_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TextBox4_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
