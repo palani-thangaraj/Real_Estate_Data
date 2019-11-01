@@ -27,9 +27,17 @@ namespace Data
         }
 
 
+        // Read in county and zip boundaries and substitute county names for fips code
+        // Figure out a c# api or call the python api somehow??????????????????
 
 
-         
+        // Load the user input data in and count how many locations were successfully read and how many were not
+        // store the data in three separate dictionaries [zip, county, state], depending on how the data is inputted,
+        // this may require some consolidation [i.e. matching zip codes to states]
+
+        // As the code develops, need to start using sql to implement a database
+
+        
 
 
         /// <summary>
@@ -159,19 +167,38 @@ namespace Data
             var doc = XDocument.Load("gadm36_USA.kml");
             XNamespace ns = "http://www.opengis.net/kml/2.2";
             var result = doc.Root.Descendants(ns + "Placemark");
+
+            List<XElement> simpleFields;
             List<XElement> extendedDatas = doc.Descendants(ns + "ExtendedData").ToList();
+
+            // This is going to be the implementation I use
+            using (var e1 = extendedDatas.GetEnumerator())
+            using (var e2 = result.GetEnumerator())
+            {
+                while(e1.MoveNext() && e2.MoveNext())
+                {
+                    simpleFields = e1.Current.Descendants(ns + "SimpleData").ToList();
+                    locationList = e2.Current.Element(ns + "MultiGeometry").Element(ns + "Polygon").Element(ns + "outerBoundaryIs").Element(ns + "LinearRing").Element(ns + "coordinates").Value.Split(' ').ToList();
+                    var country = simpleFields[0].Value;
+                    var state = simpleFields[1].Value;
+                    var county = simpleFields[2].Value;
+                }
+            }
+
+            // get the regions
             foreach (XElement extendedData in extendedDatas)
             {
-                List<XElement> simpleFields = extendedData.Elements(ns + "SimpleField").ToList();
+                simpleFields = extendedData.Descendants(ns + "SimpleData").ToList();
+                var country = simpleFields[0].Value;
+                var state = simpleFields[1].Value;
+                var county = simpleFields[2].Value; 
             }
+
+            // get the coordinates
             foreach (XElement xmlInfo in result)
             {
+                var test = xmlInfo.Element(ns + "ExtendedData");
                 var region = xmlInfo.Element(ns + "ExtendedData").Element(ns + "SchemaData").Value;
-                List<XElement> simpleFields = xmlInfo.Element(ns + "ExtendedData").Element(ns + "SchemaData").Elements(ns + "SimpleField").ToList();
-                //var country = region.Element(ns + "SimpleData").Value;
-                //var state = region.Element(ns + "SimpleData");
-                //var cityCounty = region.Element(ns + "SimpleData");
-                //<Polygon><outerBoundaryIs><LinearRing><coordinates>
                 locationList = xmlInfo.Element(ns + "MultiGeometry").Element(ns + "Polygon").Element(ns + "outerBoundaryIs").Element(ns + "LinearRing").Element(ns + "coordinates").Value.Split(' ').ToList();
                 region = region.ToLower();
                 region = Regex.Replace(region, @"[^\w]", string.Empty);
@@ -180,12 +207,12 @@ namespace Data
             return CountyCoordinates;
         }
 
-        private string ConvertLocation(string location)
+        private List<string> getCoords(County county)
         {
-            location = location.ToLower();
-            location = Regex.Replace(location, @"[^\w]", string.Empty);
-            location = location.Replace("county", string.Empty);
-            return location;
+            List<string> coords = new List<string>();
+
+
+            return coords;
         }
 
         /// <summary>
@@ -197,7 +224,6 @@ namespace Data
         {
             return data.OrderByDescending(x => x.Value.scaled).Select(x => x.Key).ToList();
         }
-
     }
 
     /// <summary>
@@ -223,6 +249,12 @@ namespace Data
         {
             this.location = location;
             this.coords = coords;
+        }
+
+        public County (string state, string county)
+        {
+            this.state = state;
+            this.county = county;
         }
     }
 }
